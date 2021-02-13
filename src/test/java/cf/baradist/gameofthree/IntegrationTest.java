@@ -61,10 +61,10 @@ class IntegrationTest {
                 .andExpect(jsonPath("$.gameId", is(gameId)))
                 .andExpect(jsonPath("$.playerId", is("mary")));
 
-        mockMvc.perform(get("/game")).andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath("[0].player1", is("john")))
-                .andExpect(jsonPath("[0].player2", is("mary")))
-                .andExpect(jsonPath("[0].nextTurn", is("mary")));
+        mockMvc.perform(get("/game/" + gameId)).andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.player1", is("john")))
+                .andExpect(jsonPath("$.player2", is("mary")))
+                .andExpect(jsonPath("$.nextTurn", is("mary")));
 
         mockMvc.perform(post("/game/" + gameId + "/move")
                 .contentType("application/json")
@@ -80,9 +80,9 @@ class IntegrationTest {
                 .andExpect(jsonPath("$.sum", is(1)))
                 .andExpect(jsonPath("$.finished", is(true)));
 
-        mockMvc.perform(get("/game")).andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath("[0].sum", is(1)))
-                .andExpect(jsonPath("[0].finished", is(true)))
-                .andExpect(jsonPath("[0].winner", is("john")));
+        mockMvc.perform(get("/game/" + gameId)).andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum", is(1)))
+                .andExpect(jsonPath("$.finished", is(true)))
+                .andExpect(jsonPath("$.winner", is("john")));
     }
 }

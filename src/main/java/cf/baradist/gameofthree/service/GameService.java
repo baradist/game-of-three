@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,7 +26,11 @@ public class GameService {
     private final MoveRepository moveRepository;
 
     public List<Game> getAvailableGameSessions() {
-        return repository.findAll(); // TODO: get available
+        return repository.findAllByPlayer2IsNull();
+    }
+
+    public Optional<Game> getById(String id) {
+        return repository.findById(id);
     }
 
     public String startGame(String initiatorPlayer, int sum) {

@@ -6,6 +6,7 @@ import cf.baradist.gameofthree.event.MoveEvent;
 import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.event.StartGameEvent;
 import cf.baradist.gameofthree.event.StartedGameEvent;
+import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.model.Game;
 import cf.baradist.gameofthree.model.MoveAction;
 import cf.baradist.gameofthree.service.GameService;
@@ -30,6 +31,11 @@ public class GameController {
     @GetMapping
     public List<Game> getAvailableGameSessions() {
         return service.getAvailableGameSessions();
+    }
+
+    @GetMapping("/{id}")
+    public Game getById(@PathVariable String id) {
+        return service.getById(id).orElseThrow(GameNotFoundException::new);
     }
 
     @PostMapping
