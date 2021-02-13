@@ -2,6 +2,7 @@ package cf.baradist.gameofthree.service;
 
 import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
+import cf.baradist.gameofthree.exception.GameStartedException;
 import cf.baradist.gameofthree.exception.WrongMoveException;
 import cf.baradist.gameofthree.exception.WrongTurnException;
 import cf.baradist.gameofthree.model.Game;
@@ -43,11 +44,12 @@ public class GameService {
     public void joinGame(String gameId, String player) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
-        if (game.getPlayer2() == null) { // TODO
-            game.setPlayer2(player);
-            game.setNextTurn(player);
-            repository.save(game);
+        if (game.getPlayer2() != null) {
+            throw new GameStartedException(game, player);
         }
+        game.setPlayer2(player);
+        game.setNextTurn(player);
+        repository.save(game);
         // TODO: notify players
     }
 
@@ -60,7 +62,7 @@ public class GameService {
         }
         // TODO: check a number of the move?
         int sum = game.getSum() + action.getValue();
-        if ((sum % DELIMITER != 0)) {
+        if (isWrongSum(sum)) {
             throw new WrongMoveException(game, player, sum);
         }
         int nextSum = sum / DELIMITER;
@@ -82,6 +84,10 @@ public class GameService {
                 .number(number)
                 .build());
         return moveResult;
+    }
+
+    private boolean isWrongSum(int sum) {
+        return sum % DELIMITER != 0;
     }
 
     private boolean isWin(int nextSum) {
