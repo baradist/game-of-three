@@ -1,11 +1,14 @@
 package cf.baradist.gameofthree.service;
 
+import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.WrongMoveException;
 import cf.baradist.gameofthree.exception.WrongTurnException;
 import cf.baradist.gameofthree.model.Game;
+import cf.baradist.gameofthree.model.Move;
 import cf.baradist.gameofthree.model.MoveAction;
 import cf.baradist.gameofthree.repository.GameRepository;
+import cf.baradist.gameofthree.repository.MoveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +19,10 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class GameService {
+    public static final int DELIMITER = 3;
+    public static final int LAST_SUM = 1;
     private final GameRepository repository;
+    private final MoveRepository moveRepository;
 
     public List<Game> getAvailableGameSessions() {
         return repository.findAll(); // TODO: get available
@@ -41,24 +47,40 @@ public class GameService {
     }
 
     @Transactional
-    public void move(String gameId, int number, String player, MoveAction action) {
+    public MoveResult move(String gameId, int number, String player, MoveAction action) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
         if (!player.equals(game.getNextTurn())) {
             throw new WrongTurnException(game, player);
         }
         // TODO: check a number of the move?
-        int nextSum = game.getSum() + action.getValue();
-        if ((nextSum % 3 != 0)) {
-            throw new WrongMoveException(game, player, nextSum);
+        int sum = game.getSum() + action.getValue();
+        if ((sum % DELIMITER != 0)) {
+            throw new WrongMoveException(game, player, sum);
         }
-        game.setSum(nextSum);
+        int nextSum = sum / DELIMITER;
         game.setNextTurn(getNexTurn(game));
-        if (nextSum == 0) {
+        MoveResult moveResult = MoveResult.builder()
+                .sum(nextSum)
+                .build();
+        game.setSum(nextSum);
+        if (isWin(nextSum)) {
             game.setFinished(true);
             game.setWinner(player);
+            moveResult.setFinished(true);
         }
         repository.save(game);
+        moveRepository.save(Move.builder()
+                .game(game)
+                .action(action)
+                .initiator(player)
+                .number(number)
+                .build());
+        return moveResult;
+    }
+
+    private boolean isWin(int nextSum) {
+        return nextSum == LAST_SUM;
     }
 
     private String getNexTurn(Game game) {

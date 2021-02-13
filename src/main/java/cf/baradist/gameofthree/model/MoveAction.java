@@ -15,4 +15,13 @@ public enum MoveAction {
     public int getValue() {
         return value;
     }
+
+    public static MoveAction ofValue(int value) {
+        for (MoveAction moveAction : values()) {
+            if (moveAction.getValue() == value) {
+                return moveAction;
+            }
+        }
+        return null;
+    }
 }

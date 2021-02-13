@@ -1,16 +1,12 @@
 package cf.baradist.gameofthree;
 
 import cf.baradist.gameofthree.event.StartedGameEvent;
-import cf.baradist.gameofthree.model.Game;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -42,7 +38,7 @@ class IntegrationTest {
     void test() throws Exception {
         String gameStartedContent = mockMvc.perform(post("/game")
                 .contentType("application/json")
-                .content("{ \"sum\": 42 }")
+                .content("{ \"sum\": 11 }")
                 .header("Player", "john")).andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId", notNullValue()))
                 .andReturn().getResponse().getContentAsString();
@@ -50,11 +46,13 @@ class IntegrationTest {
         String gameId = joinedGameEvent.getGameId();
 
         mockMvc.perform(get("/game")).andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("[0].id", is(gameId)))
                 .andExpect(jsonPath("[0].player1", is("john")))
                 .andExpect(jsonPath("[0].player2", nullValue()))
                 .andExpect(jsonPath("[0].nextTurn", nullValue()))
-                .andReturn().getResponse().getContentAsString();
-
+                .andExpect(jsonPath("[0].sum", is(11)))
+                .andExpect(jsonPath("[0].finished", is(false)))
+                .andExpect(jsonPath("[0].winner", nullValue()));
 
         mockMvc.perform(put("/game")
                 .contentType("application/json")
@@ -66,7 +64,25 @@ class IntegrationTest {
         mockMvc.perform(get("/game")).andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("[0].player1", is("john")))
                 .andExpect(jsonPath("[0].player2", is("mary")))
-                .andExpect(jsonPath("[0].nextTurn", is("mary")))
-                .andReturn().getResponse().getContentAsString();
+                .andExpect(jsonPath("[0].nextTurn", is("mary")));
+
+        mockMvc.perform(post("/game/" + gameId + "/move")
+                .contentType("application/json")
+                .content("{\"gameId\": \"" + gameId + "\", \"number\": 0, \"action\": 1}")
+                .header("Player", "mary")).andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum", is(4)))
+                .andExpect(jsonPath("$.finished", is(false)));
+
+        mockMvc.perform(post("/game/" + gameId + "/move")
+                .contentType("application/json")
+                .content("{\"gameId\": \"" + gameId + "\", \"number\": 0, \"action\": -1}")
+                .header("Player", "john")).andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum", is(1)))
+                .andExpect(jsonPath("$.finished", is(true)));
+
+        mockMvc.perform(get("/game")).andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("[0].sum", is(1)))
+                .andExpect(jsonPath("[0].finished", is(true)))
+                .andExpect(jsonPath("[0].winner", is("john")));
     }
 }
