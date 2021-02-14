@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("game")
+@RequestMapping("/api/game")
 @RequiredArgsConstructor
 public class GameController {
     private final GameService service;
@@ -39,8 +39,8 @@ public class GameController {
     }
 
     @PostMapping
-    public StartedGameEvent startGame(@RequestBody StartGameEvent event,
-                                      @RequestHeader("Player") String player) {
+    public StartedGameEvent startGame(@RequestBody StartGameEvent event, Principal principal) {
+        String player = principal.getName();
         String gameId = service.startGame(player, event.getSum());
         return StartedGameEvent.builder()
                 .gameId(gameId)
@@ -48,8 +48,8 @@ public class GameController {
     }
 
     @PutMapping
-    public JoinedGameEvent joinGame(@RequestBody JoinGameEvent event,
-                                    @RequestHeader("Player") String player) {
+    public JoinedGameEvent joinGame(@RequestBody JoinGameEvent event, Principal principal) {
+        String player = principal.getName();
         service.joinGame(event.getGameId(), player);
         return JoinedGameEvent.builder()
                 .gameId(event.getGameId())
@@ -60,7 +60,7 @@ public class GameController {
     @PostMapping("/{gameId}/move")
     public MoveResult move(@PathVariable String gameId,
                            @RequestBody MoveEvent event,
-                           @RequestHeader("Player") String player) {
-        return service.move(gameId, event.getNumber(), player, MoveAction.ofValue(event.getAction()));
+                           Principal principal) {
+        return service.move(gameId, event.getNumber(), principal.getName(), MoveAction.ofValue(event.getAction()));
     }
 }
