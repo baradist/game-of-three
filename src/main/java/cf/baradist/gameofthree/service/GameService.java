@@ -12,13 +12,14 @@ import cf.baradist.gameofthree.repository.GameRepository;
 import cf.baradist.gameofthree.repository.MoveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class GameService {
     public static final int DELIMITER = 3;
@@ -53,7 +54,6 @@ public class GameService {
         // TODO: notify players
     }
 
-    @Transactional
     public MoveResult move(String gameId, int number, String player, MoveAction action) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
