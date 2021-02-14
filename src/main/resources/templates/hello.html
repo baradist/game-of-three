@@ -1,11 +1,76 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
->
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>Game of Three</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
 </head>
 <body>
-<h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div class="container" id="main-content">
+    <div class="row">
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="connect">WebSocket connection:</label>
+                    <button class="btn btn-default" id="connect" type="submit">Connect</button>
+                    <button class="btn btn-default" disabled="disabled" id="disconnect" type="submit">Disconnect
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="name">Game ID to join</label>
+                    <input class="form-control" id="game_id_to_join" placeholder="Game ID here..." type="text">
+                    <input class="form-control" id="new_game_sum" placeholder="Sum of a new game" type="number">
+                </div>
+                <button class="btn btn-default" id="send_join" type="submit">Join</button>
+                <button class="btn btn-default" id="send_create" type="submit">Create</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-default" id="send_decrease" type="submit">-1</button>
+            <button class="btn btn-default" id="send_dont_change" type="submit">0</button>
+            <button class="btn btn-default" id="send_increase" type="submit">1</button>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="name">Game ID</label>
+                    <input class="form-control" id="game_id" placeholder="Game ID here..." type="text">
+                </div>
+                <div class="form-group">
+                    <label for="name">number</label>
+                    <input class="form-control" id="number" type="number">
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            current_game
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped" id="games_table">
+                <thead>
+                <tr>
+                    <th>Games</th>
+                </tr>
+                </thead>
+                <tbody id="games">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 <form method="post" th:action="@{/logout}">
     <input type="submit" value="Sign Out"/>
 </form>

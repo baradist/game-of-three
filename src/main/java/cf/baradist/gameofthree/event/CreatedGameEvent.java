@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StartGameEvent {
-    private int sum;
+public class CreatedGameEvent extends ResultEvent {
+    private String gameId;
 }

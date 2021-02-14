@@ -1,6 +1,6 @@
 package cf.baradist.gameofthree;
 
-import cf.baradist.gameofthree.event.StartedGameEvent;
+import cf.baradist.gameofthree.event.CreatedGameEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ class IntegrationTest {
                 .andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId", notNullValue()))
                 .andReturn().getResponse().getContentAsString();
-        StartedGameEvent joinedGameEvent = objectMapper.readValue(gameStartedContent, StartedGameEvent.class);
+        CreatedGameEvent joinedGameEvent = objectMapper.readValue(gameStartedContent, CreatedGameEvent.class);
         String gameId = joinedGameEvent.getGameId();
 
         mockMvc.perform(get(GAME_API)

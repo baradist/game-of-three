@@ -28,7 +28,7 @@ public class GameService {
     private final MoveRepository moveRepository;
 
     public List<Game> getAvailableGameSessions() {
-        return repository.findAllByPlayer2IsNull();
+        return repository.findAll(); // TODO: temporary show all games
     }
 
     public Optional<Game> getById(String id) {

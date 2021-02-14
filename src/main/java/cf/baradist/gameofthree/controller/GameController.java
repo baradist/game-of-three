@@ -1,11 +1,11 @@
 package cf.baradist.gameofthree.controller;
 
+import cf.baradist.gameofthree.event.CreateGameEvent;
+import cf.baradist.gameofthree.event.CreatedGameEvent;
 import cf.baradist.gameofthree.event.JoinGameEvent;
 import cf.baradist.gameofthree.event.JoinedGameEvent;
 import cf.baradist.gameofthree.event.MoveEvent;
 import cf.baradist.gameofthree.event.MoveResult;
-import cf.baradist.gameofthree.event.StartGameEvent;
-import cf.baradist.gameofthree.event.StartedGameEvent;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.model.Game;
 import cf.baradist.gameofthree.model.MoveAction;
@@ -39,10 +39,10 @@ public class GameController {
     }
 
     @PostMapping
-    public StartedGameEvent startGame(@RequestBody StartGameEvent event, Principal principal) {
+    public CreatedGameEvent startGame(@RequestBody CreateGameEvent event, Principal principal) {
         String player = principal.getName();
         String gameId = service.startGame(player, event.getSum());
-        return StartedGameEvent.builder()
+        return CreatedGameEvent.builder()
                 .gameId(gameId)
                 .build();
     }
