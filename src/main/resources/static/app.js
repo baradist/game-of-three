@@ -41,13 +41,22 @@ function disconnect() {
     console.log("Disconnected");
 }
 
+async function doMoveIfAuto(sum) {
+    if ($("#auto_mode").is(':checked')) {
+        await sleep(2000);
+        var action = 1 - Math.abs(2 - sum) % 3
+        sendAction(action)
+    }
+}
+
 function processGameMessage(game) {
     if (game.player1 == currentUser || game.player2 == currentUser) {
         redrawCurrentGame(game);
         if (game.nextTurn == currentUser) {
-            $("#status").text('It\'s our turn to go');
+            $("#status").text('It\'s our turn!');
+            doMoveIfAuto(game.sum)
         } else {
-            $("#status").text('Waiting for the enemy\'s go')
+            $("#status").text('Waiting for the enemy...')
         }
     } else if (currentGame == null) {
         $("#game_id").val(game.id)
@@ -105,29 +114,16 @@ function processMove(moveResult) {
     currentGame.nextTurn = moveResult.nextTurn
     redrawCurrentGame(currentGame)
     switchStatus(moveResult)
+    if (!moveResult.finished && currentUser == moveResult.nextTurn) {
+        doMoveIfAuto(moveResult.nextSum)
+    }
 }
 
-function sendDecrease() {
+function sendAction(action) {
     stompClient.send("/app/move", {}, JSON.stringify({
         'gameId': $("#game_id").val(),
         'moveVersion': $("#move_version").val(),
-        'action': "-1"
-    }));
-}
-
-function sendDontChange() {
-    stompClient.send("/app/move", {}, JSON.stringify({
-        'gameId': $("#game_id").val(),
-        'moveVersion': $("#move_version").val(),
-        'action': "0"
-    }));
-}
-
-function sendIncrease() {
-    stompClient.send("/app/move", {}, JSON.stringify({
-        'gameId': $("#game_id").val(),
-        'moveVersion': $("#move_version").val(),
-        'action': "1"
+        'action': action
     }));
 }
 
@@ -155,13 +151,13 @@ $(function () {
     });
 
     $("#send_decrease").click(function () {
-        sendDecrease();
+        sendAction(-1);
     });
     $("#send_dont_change").click(function () {
-        sendDontChange();
+        sendAction(0);
     });
     $("#send_increase").click(function () {
-        sendIncrease();
+        sendAction(1);
     });
     $("#send_create").click(function () {
         sendCreate();
@@ -176,21 +172,19 @@ $(document).ready(function () {
         url: "/api/game",
         context: document.body,
         success: function (games) {
-            // $("#games").html(games);
             gameList = games
             updateTable(games_table, games)
         }
     });
+    connect()
 });
 
 function updateTable(updatableTable, jsonData) {
-
     var tableHTML = "<tr>";
     for (var headers in jsonData[0]) {
         tableHTML += "<th>" + headers + "</th>";
     }
     tableHTML += "</tr>";
-
     for (var eachItem in jsonData) {
         tableHTML += "<tr>";
         var dataObj = jsonData[eachItem];
@@ -199,6 +193,9 @@ function updateTable(updatableTable, jsonData) {
         }
         tableHTML += "</tr>";
     }
-
     updatableTable.innerHTML = tableHTML;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

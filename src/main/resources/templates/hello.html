@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html>
 <head>
     <title>Game of Three</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -32,8 +32,9 @@
                     <input class="form-control" id="new_game_sum" max="1000" min="1"
                            placeholder="Sum of a new game" type="number" value="42">
                 </div>
-                <button class="btn btn-default" id="send_create" type="submit">Create</button>
-                <button class="btn btn-default" id="send_join" type="submit">Join</button>
+                <button class="btn btn-default" id="send_create" type="submit">Create New Game</button>
+                <button class="btn btn-default" id="send_join" type="submit">Join Existing Game</button>
+                <input id="auto_mode" type="checkbox" value="a1">Auto mode<Br>
             </form>
         </div>
         <div class="col-md-6">
@@ -42,7 +43,7 @@
             <button class="btn btn-default" id="send_increase" type="submit">1</button>
             <form class="form-inline">
                 <div class="form-group">
-                    <label for="name">Game ID</label>
+                    <label for="name">Selected Game ID</label>
                     <input class="form-control" id="game_id" placeholder="Game ID here..." type="text">
                 </div>
                 <div class="form-group">
@@ -70,8 +71,5 @@
         </div>
     </div>
 </div>
-<form method="post" th:action="@{/logout}">
-    <input type="submit" value="Sign Out"/>
-</form>
 </body>
 </html>
