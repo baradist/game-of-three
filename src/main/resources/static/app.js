@@ -1,5 +1,9 @@
 var stompClient = null;
 
+var currentUser = null
+var currentGame = null
+var gameList = null
+
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
@@ -17,11 +21,28 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/games', function (game) {
-            showGame(JSON.parse(game.body).content);
+        currentUser = frame.headers['user-name']
+
+        stompClient.subscribe('/topic/games', function (message) {
+            var game = JSON.parse(message.body)
+
+            if (game.player1 == currentUser || game.player2 == currentUser) {
+                currentGame = game
+                redrawCurrentGame();
+            }
+            if (game.player2 == null) { // game started
+                addGame(game)
+            } else { // game joined
+                for (var i = 0; i < gameList.length; i++) {
+                    if (gameList[i].id == game.id) {
+                        gameList[i] = game
+                    }
+                }
+                updateTable(games_table, gameList)
+            }
         });
         stompClient.subscribe('/user/queue/games', function (currentGame) {
-            showCurrentGame(JSON.parse(currentGame.body).content);
+            showMove(JSON.parse(currentGame.body));
         });
     });
 }
@@ -34,12 +55,48 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function showGame(message) {
-    $("#games").append("<tr><td>" + message + "</td></tr>");
+function redrawCurrentGame() {
+    updateTable(current_game, [currentGame])
+    // $("#current_game").innerHTML = "<tbody>\n" +
+    //     "                <tr>\n" +
+    //     "                    <th>id</th>\n" +
+    //     "                    <th>player1</th>\n" +
+    //     "                    <th>player2</th>\n" +
+    //     "                    <th>nextTurn</th>\n" +
+    //     "                    <th>sum</th>\n" +
+    //     "                    <th>finished</th>\n" +
+    //     "                    <th>winner</th>\n" +
+    //     "                </tr>\n" +
+    //     "                <tr>\n" +
+    //     "                    <td>" + currentGame.id + "</td>\n" +
+    //     "                    <td>" + currentGame.player1 + "</td>\n" +
+    //     "                    <td>" + currentGame.player2 + "</td>\n" +
+    //     "                    <td>" + currentGame.nextTurn + "</td>\n" +
+    //     "                    <td>" + currentGame.sum + "</td>\n" +
+    //     "                    <td>" + currentGame.finished + "</td>\n" +
+    //     "                    <td>" + currentGame.winner + "</td>\n" +
+    //     "                </tr>\n" +
+    //     "                </tbody>"
 }
 
-function showCurrentGame(message) {
-    $("#current_game").append("<tr><td>" + message + "</td></tr>"); // TODO
+function addGame(game) {
+    gameList.push(game)
+    updateTable(games_table, gameList)
+    // $("#games").append("                <tr>\n" +
+    //     "                    <td>" + game.gameId + "</td>\n" +
+    //     "                    <td>" + game.player1 + "</td>\n" +
+    //     "                    <td>" + game.player2 + "</td>\n" +
+    //     "                    <td>" + game.nextTurn + "</td>\n" +
+    //     "                    <td>" + game.sum + "</td>\n" +
+    //     "                    <td>" + game.finished + "</td>\n" +
+    //     "                    <td>" + game.winner + "</td>\n" +
+    //     "                </tr>\n")
+
+}
+
+function showMove(moveResult) {
+    $("#move_version").val(moveResult.nextMoveVersion)
+    $("#current_game").append("<tr><td>" + moveResult + "</td></tr>"); // TODO
 }
 
 function sendDecrease() {
@@ -74,7 +131,7 @@ function sendCreate() {
 
 function sendJoin() {
     stompClient.send("/app/games/join", {}, JSON.stringify({
-        'gameId': $("#game_id_to_join").val()
+        'gameId': $("#game_id").val()
     }));
 }
 
@@ -112,6 +169,7 @@ $(document).ready(function () {
         context: document.body,
         success: function (games) {
             // $("#games").html(games);
+            gameList = games
             updateTable(games_table, games)
         }
     });

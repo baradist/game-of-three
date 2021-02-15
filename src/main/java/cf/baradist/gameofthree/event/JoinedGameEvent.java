@@ -8,4 +8,5 @@ import lombok.Data;
 public class JoinedGameEvent extends ResultEvent {
     private String gameId;
     private String playerId;
+    private GameDto game;
 }

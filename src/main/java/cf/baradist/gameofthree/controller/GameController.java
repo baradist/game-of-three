@@ -41,7 +41,7 @@ public class GameController {
     @PostMapping
     public CreatedGameEvent startGame(@RequestBody CreateGameEvent event, Principal principal) {
         String player = principal.getName();
-        String gameId = service.startGame(player, event.getSum());
+        String gameId = service.startGame(player, event.getSum()).getId();
         return CreatedGameEvent.builder()
                 .gameId(gameId)
                 .build();

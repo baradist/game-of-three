@@ -1,5 +1,6 @@
 package cf.baradist.gameofthree.service;
 
+import cf.baradist.gameofthree.event.GameDto;
 import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.GameStartedException;
@@ -35,14 +36,14 @@ public class GameService {
         return repository.findById(id);
     }
 
-    public String startGame(String initiatorPlayer, int sum) {
+    public GameDto startGame(String initiatorPlayer, int sum) {
         Game game = new Game(
                 UUID.randomUUID().toString(), initiatorPlayer, null, null, sum, false, null);
         repository.save(game);
-        return game.getId();
+        return mapGameToDto(game);
     }
 
-    public void joinGame(String gameId, String player) {
+    public GameDto joinGame(String gameId, String player) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
         if (game.getPlayer2() != null) {
@@ -51,7 +52,24 @@ public class GameService {
         game.setPlayer2(player);
         game.setNextTurn(player);
         repository.save(game);
-        // TODO: notify players
+//        return JoinedGameEvent.builder()
+//                .gameId(gameId)
+//                .playerId(player)
+//                .game(mapGameToDto(game))
+//                .build();
+        return mapGameToDto(game);
+    }
+
+    private GameDto mapGameToDto(Game game) {
+        return GameDto.builder()
+                .id(game.getId())
+                .player1(game.getPlayer1())
+                .player2(game.getPlayer2())
+                .nextTurn(game.getNextTurn())
+                .sum(game.getSum())
+                .finished(game.isFinished())
+                .winner(game.getWinner())
+                .build();
     }
 
     public MoveResult move(String gameId, int moveVersion, String player, MoveAction action) {

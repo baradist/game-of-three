@@ -1,9 +1,8 @@
 package cf.baradist.gameofthree.websocket;
 
 import cf.baradist.gameofthree.event.CreateGameEvent;
-import cf.baradist.gameofthree.event.CreatedGameEvent;
+import cf.baradist.gameofthree.event.GameDto;
 import cf.baradist.gameofthree.event.JoinGameEvent;
-import cf.baradist.gameofthree.event.JoinedGameEvent;
 import cf.baradist.gameofthree.event.MoveEvent;
 import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.model.MoveAction;
@@ -24,19 +23,18 @@ public class GameEventController {
 
     @MessageMapping("/games/create")
     public void create(CreateGameEvent message, Principal principal) {
-        String gameId = service.startGame(principal.getName(), message.getSum());
-        notifyService.broadcast(CreatedGameEvent.builder()
-                .gameId(gameId)
-                .build());
+        GameDto gameDto = service.startGame(principal.getName(), message.getSum());
+        notifyService.broadcast(gameDto);
     }
 
     @MessageMapping("/games/join")
     public void join(JoinGameEvent message, Principal principal) {
-        service.joinGame(message.getGameId(), principal.getName());
-        notifyService.broadcast(JoinedGameEvent.builder()
-                .gameId(message.getGameId())
-                .playerId(principal.getName())
-                .build());
+        GameDto gameDto = service.joinGame(message.getGameId(), principal.getName());
+//        JoinedGameEvent joinedGameEvent = JoinedGameEvent.builder()
+//                .gameId(message.getGameId())
+//                .playerId(principal.getName())
+//                .build();
+        notifyService.broadcast(gameDto);
     }
 
     @MessageMapping("/move")

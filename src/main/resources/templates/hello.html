@@ -29,7 +29,6 @@
             <form class="form-inline">
                 <div class="form-group">
                     <label for="name">Game ID to join</label>
-                    <input class="form-control" id="game_id_to_join" placeholder="Game ID here..." type="text">
                     <input class="form-control" id="new_game_sum" placeholder="Sum of a new game" type="number">
                 </div>
                 <button class="btn btn-default" id="send_join" type="submit">Join</button>
@@ -54,7 +53,9 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            current_game
+            <table class="table table-striped" id="current_game">
+
+            </table>
         </div>
     </div>
     <div class="row">
