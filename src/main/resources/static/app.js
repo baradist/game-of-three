@@ -27,18 +27,19 @@ function connect() {
             var game = JSON.parse(message.body)
 
             if (game.player1 == currentUser || game.player2 == currentUser) {
-                currentGame = game
-                redrawCurrentGame();
+                redrawCurrentGame(game);
+            } else if (currentGame == null) {
+                $("#game_id").val(game.id)
             }
             if (game.player2 == null) { // game started
-                addGame(game)
+                addGame(game);
             } else { // game joined
                 for (var i = 0; i < gameList.length; i++) {
                     if (gameList[i].id == game.id) {
                         gameList[i] = game
                     }
                 }
-                updateTable(games_table, gameList)
+                updateTable(games_table, gameList);
             }
         });
         stompClient.subscribe('/user/queue/games', function (currentGame) {
@@ -55,48 +56,27 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function redrawCurrentGame() {
-    updateTable(current_game, [currentGame])
-    // $("#current_game").innerHTML = "<tbody>\n" +
-    //     "                <tr>\n" +
-    //     "                    <th>id</th>\n" +
-    //     "                    <th>player1</th>\n" +
-    //     "                    <th>player2</th>\n" +
-    //     "                    <th>nextTurn</th>\n" +
-    //     "                    <th>sum</th>\n" +
-    //     "                    <th>finished</th>\n" +
-    //     "                    <th>winner</th>\n" +
-    //     "                </tr>\n" +
-    //     "                <tr>\n" +
-    //     "                    <td>" + currentGame.id + "</td>\n" +
-    //     "                    <td>" + currentGame.player1 + "</td>\n" +
-    //     "                    <td>" + currentGame.player2 + "</td>\n" +
-    //     "                    <td>" + currentGame.nextTurn + "</td>\n" +
-    //     "                    <td>" + currentGame.sum + "</td>\n" +
-    //     "                    <td>" + currentGame.finished + "</td>\n" +
-    //     "                    <td>" + currentGame.winner + "</td>\n" +
-    //     "                </tr>\n" +
-    //     "                </tbody>"
+function redrawCurrentGame(game) {
+    currentGame = game
+    updateTable(current_game, [currentGame]);
+    $("#game_id").val(currentGame.id)
+    $("#move_version").val(0)
 }
 
 function addGame(game) {
     gameList.push(game)
     updateTable(games_table, gameList)
-    // $("#games").append("                <tr>\n" +
-    //     "                    <td>" + game.gameId + "</td>\n" +
-    //     "                    <td>" + game.player1 + "</td>\n" +
-    //     "                    <td>" + game.player2 + "</td>\n" +
-    //     "                    <td>" + game.nextTurn + "</td>\n" +
-    //     "                    <td>" + game.sum + "</td>\n" +
-    //     "                    <td>" + game.finished + "</td>\n" +
-    //     "                    <td>" + game.winner + "</td>\n" +
-    //     "                </tr>\n")
-
 }
 
 function showMove(moveResult) {
     $("#move_version").val(moveResult.nextMoveVersion)
-    $("#current_game").append("<tr><td>" + moveResult + "</td></tr>"); // TODO
+    currentGame.sum = moveResult.nextSum
+    currentGame.finished = moveResult.finished
+    if (moveResult.finished) {
+        currentGame.winner = currentGame.nextTurn;
+    }
+    currentGame.nextTurn = moveResult.nextTurn
+    redrawCurrentGame(currentGame)
 }
 
 function sendDecrease() {

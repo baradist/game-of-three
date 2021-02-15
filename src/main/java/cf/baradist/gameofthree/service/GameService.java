@@ -4,8 +4,11 @@ import cf.baradist.gameofthree.event.GameDto;
 import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.GameStartedException;
+import cf.baradist.gameofthree.exception.IncorrectInitialSumException;
+import cf.baradist.gameofthree.exception.UserAlreadyParticipatedException;
 import cf.baradist.gameofthree.exception.WrongMoveException;
 import cf.baradist.gameofthree.exception.WrongTurnException;
+import cf.baradist.gameofthree.exception.WrongUserException;
 import cf.baradist.gameofthree.model.Game;
 import cf.baradist.gameofthree.model.Move;
 import cf.baradist.gameofthree.model.MoveAction;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +41,9 @@ public class GameService {
     }
 
     public GameDto startGame(String initiatorPlayer, int sum) {
+        if (sum < 1) {
+            throw new IncorrectInitialSumException(sum);
+        }
         Game game = new Game(
                 UUID.randomUUID().toString(), initiatorPlayer, null, null, sum, false, null);
         repository.save(game);
@@ -49,14 +56,12 @@ public class GameService {
         if (game.getPlayer2() != null) {
             throw new GameStartedException(game, player);
         }
+        if (Objects.equals(player, game.getPlayer1())) {
+            throw new UserAlreadyParticipatedException(game, player);
+        }
         game.setPlayer2(player);
         game.setNextTurn(player);
         repository.save(game);
-//        return JoinedGameEvent.builder()
-//                .gameId(gameId)
-//                .playerId(player)
-//                .game(mapGameToDto(game))
-//                .build();
         return mapGameToDto(game);
     }
 
@@ -75,6 +80,9 @@ public class GameService {
     public MoveResult move(String gameId, int moveVersion, String player, MoveAction action) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
+        if (!player.equals(game.getPlayer1()) && !player.equals(game.getPlayer2())) {
+            throw new WrongUserException(game, player);
+        }
         if (!player.equals(game.getNextTurn())) {
             throw new WrongTurnException(game, player);
         }
@@ -84,7 +92,7 @@ public class GameService {
             throw new WrongMoveException(game, player, sum);
         }
         int nextSum = sum / DELIMITER;
-        String nextTurnPlayer = getNextTurn(game);
+        String nextTurnPlayer = getNextTurn(game, player);
         game.setNextTurn(nextTurnPlayer);
         MoveResult moveResult = MoveResult.builder()
                 .nextSum(nextSum)
@@ -115,7 +123,7 @@ public class GameService {
         return nextSum == LAST_SUM;
     }
 
-    private String getNextTurn(Game game) {
+    private String getNextTurn(Game game, String currentPlayer) {
         return game.getNextTurn().equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1();
     }
 }

@@ -39,10 +39,12 @@ public class GameEventController {
 
     @MessageMapping("/move")
     public void move(MoveEvent message, Principal principal) {
+        String player = principal.getName();
         MoveResult moveResult = service.move(message.getGameId(),
                 message.getMoveVersion(),
-                principal.getName(),
+                player,
                 MoveAction.ofValue(message.getAction()));
         notifyService.sendTo(moveResult.getNextTurn(), moveResult);
+        notifyService.sendTo(player, moveResult);
     }
 }
