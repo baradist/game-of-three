@@ -29,7 +29,8 @@
             <form class="form-inline">
                 <div class="form-group">
                     <label for="name">Sum of a new game</label>
-                    <input class="form-control" id="new_game_sum" placeholder="Sum of a new game" type="number">
+                    <input class="form-control" id="new_game_sum" max="1000" min="1"
+                           placeholder="Sum of a new game" type="number" value="42">
                 </div>
                 <button class="btn btn-default" id="send_create" type="submit">Create</button>
                 <button class="btn btn-default" id="send_join" type="submit">Join</button>
@@ -47,6 +48,11 @@
                 <div class="form-group">
                     <label for="name">move_version</label>
                     <input class="form-control" id="move_version" type="number">
+                </div>
+            </form>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="name" id="status">Status</label>
                 </div>
             </form>
         </div>

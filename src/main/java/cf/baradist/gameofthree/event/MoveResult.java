@@ -10,4 +10,5 @@ public class MoveResult extends ResultEvent {
     private int nextSum;
     private String nextTurn;
     private int nextMoveVersion;
+    private String winner;
 }

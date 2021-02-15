@@ -104,6 +104,7 @@ public class GameService {
             game.setFinished(true);
             game.setWinner(player);
             moveResult.setFinished(true);
+            moveResult.setWinner(player);
         }
         repository.save(game);
         moveRepository.save(Move.builder()

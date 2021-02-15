@@ -25,25 +25,10 @@ function connect() {
 
         stompClient.subscribe('/topic/games', function (message) {
             var game = JSON.parse(message.body)
-
-            if (game.player1 == currentUser || game.player2 == currentUser) {
-                redrawCurrentGame(game);
-            } else if (currentGame == null) {
-                $("#game_id").val(game.id)
-            }
-            if (game.player2 == null) { // game started
-                addGame(game);
-            } else { // game joined
-                for (var i = 0; i < gameList.length; i++) {
-                    if (gameList[i].id == game.id) {
-                        gameList[i] = game
-                    }
-                }
-                updateTable(games_table, gameList);
-            }
+            processGameMessage(game)
         });
         stompClient.subscribe('/user/queue/games', function (currentGame) {
-            showMove(JSON.parse(currentGame.body));
+            processMove(JSON.parse(currentGame.body));
         });
     });
 }
@@ -54,6 +39,48 @@ function disconnect() {
     }
     setConnected(false);
     console.log("Disconnected");
+}
+
+function processGameMessage(game) {
+    if (game.player1 == currentUser || game.player2 == currentUser) {
+        redrawCurrentGame(game);
+        if (game.nextTurn == currentUser) {
+            $("#status").text('It\'s our turn to go');
+        } else {
+            $("#status").text('Waiting for the enemy\'s go')
+        }
+    } else if (currentGame == null) {
+        $("#game_id").val(game.id)
+    }
+    if (game.player2 == null) { // game started
+        addGame(game);
+        if (game.player1 == currentUser) {
+            $("#status").text('Waiting for others to join')
+        }
+    } else { // game joined
+        for (var i = 0; i < gameList.length; i++) {
+            if (gameList[i].id == game.id) {
+                gameList[i] = game
+            }
+        }
+        updateTable(games_table, gameList);
+    }
+}
+
+function switchStatus(moveResult) {
+    if (moveResult.finished) {
+        if (currentUser == moveResult.winner) {
+            $("#status").text('YOU WIN!');
+        } else {
+            $("#status").text('YOU LOST!');
+        }
+    } else {
+        if (currentUser == moveResult.nextTurn) {
+            $("#status").text('It\'s our turn!');
+        } else {
+            $("#status").text('Waiting for the enemy...');
+        }
+    }
 }
 
 function redrawCurrentGame(game) {
@@ -68,7 +95,7 @@ function addGame(game) {
     updateTable(games_table, gameList)
 }
 
-function showMove(moveResult) {
+function processMove(moveResult) {
     $("#move_version").val(moveResult.nextMoveVersion)
     currentGame.sum = moveResult.nextSum
     currentGame.finished = moveResult.finished
@@ -77,6 +104,7 @@ function showMove(moveResult) {
     }
     currentGame.nextTurn = moveResult.nextTurn
     redrawCurrentGame(currentGame)
+    switchStatus(moveResult)
 }
 
 function sendDecrease() {

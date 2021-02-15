@@ -30,10 +30,6 @@ public class GameEventController {
     @MessageMapping("/games/join")
     public void join(JoinGameEvent message, Principal principal) {
         GameDto gameDto = service.joinGame(message.getGameId(), principal.getName());
-//        JoinedGameEvent joinedGameEvent = JoinedGameEvent.builder()
-//                .gameId(message.getGameId())
-//                .playerId(principal.getName())
-//                .build();
         notifyService.broadcast(gameDto);
     }
 
