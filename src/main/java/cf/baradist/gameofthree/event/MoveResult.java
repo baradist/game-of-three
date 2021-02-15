@@ -5,7 +5,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MoveResult {
+public class MoveResult extends ResultEvent {
     private boolean finished;
-    private int sum;
+    private int nextSum;
+    private String nextTurn;
+    private int nextMoveVersion;
 }

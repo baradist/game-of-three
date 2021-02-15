@@ -45,7 +45,7 @@ function showCurrentGame(message) {
 function sendDecrease() {
     stompClient.send("/app/move", {}, JSON.stringify({
         'gameId': $("#game_id").val(),
-        'number': $("#number").val(),
+        'moveVersion': $("#move_version").val(),
         'action': "-1"
     }));
 }
@@ -53,7 +53,7 @@ function sendDecrease() {
 function sendDontChange() {
     stompClient.send("/app/move", {}, JSON.stringify({
         'gameId': $("#game_id").val(),
-        'number': $("#number").val(),
+        'moveVersion': $("#move_version").val(),
         'action': "0"
     }));
 }
@@ -61,7 +61,7 @@ function sendDontChange() {
 function sendIncrease() {
     stompClient.send("/app/move", {}, JSON.stringify({
         'gameId': $("#game_id").val(),
-        'number': $("#number").val(),
+        'moveVersion': $("#move_version").val(),
         'action': "1"
     }));
 }

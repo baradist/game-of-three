@@ -5,6 +5,7 @@ import cf.baradist.gameofthree.event.CreatedGameEvent;
 import cf.baradist.gameofthree.event.JoinGameEvent;
 import cf.baradist.gameofthree.event.JoinedGameEvent;
 import cf.baradist.gameofthree.event.MoveEvent;
+import cf.baradist.gameofthree.event.MoveResult;
 import cf.baradist.gameofthree.model.MoveAction;
 import cf.baradist.gameofthree.service.GameService;
 import cf.baradist.gameofthree.service.NotifyService;
@@ -40,10 +41,10 @@ public class GameEventController {
 
     @MessageMapping("/move")
     public void move(MoveEvent message, Principal principal) {
-        service.move(message.getGameId(),
-                message.getNumber(),
+        MoveResult moveResult = service.move(message.getGameId(),
+                message.getMoveVersion(),
                 principal.getName(),
                 MoveAction.ofValue(message.getAction()));
-//        notifyService.sendTo(); // TODO
+        notifyService.sendTo(moveResult.getNextTurn(), moveResult);
     }
 }

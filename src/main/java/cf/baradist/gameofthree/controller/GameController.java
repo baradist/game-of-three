@@ -61,6 +61,6 @@ public class GameController {
     public MoveResult move(@PathVariable String gameId,
                            @RequestBody MoveEvent event,
                            Principal principal) {
-        return service.move(gameId, event.getNumber(), principal.getName(), MoveAction.ofValue(event.getAction()));
+        return service.move(gameId, event.getMoveVersion(), principal.getName(), MoveAction.ofValue(event.getAction()));
     }
 }

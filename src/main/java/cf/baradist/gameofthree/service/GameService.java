@@ -54,21 +54,24 @@ public class GameService {
         // TODO: notify players
     }
 
-    public MoveResult move(String gameId, int number, String player, MoveAction action) {
+    public MoveResult move(String gameId, int moveVersion, String player, MoveAction action) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
         if (!player.equals(game.getNextTurn())) {
             throw new WrongTurnException(game, player);
         }
-        // TODO: check a number of the move?
+        // TODO: check a moveVersion of the move?
         int sum = game.getSum() + action.getValue();
         if (isWrongSum(sum)) {
             throw new WrongMoveException(game, player, sum);
         }
         int nextSum = sum / DELIMITER;
-        game.setNextTurn(getNexTurn(game));
+        String nextTurnPlayer = getNextTurn(game);
+        game.setNextTurn(nextTurnPlayer);
         MoveResult moveResult = MoveResult.builder()
-                .sum(nextSum)
+                .nextSum(nextSum)
+                .nextTurn(nextTurnPlayer)
+                .nextMoveVersion(moveVersion + 1)
                 .build();
         game.setSum(nextSum);
         if (isWin(nextSum)) {
@@ -81,7 +84,7 @@ public class GameService {
                 .game(game)
                 .action(action)
                 .initiator(player)
-                .number(number)
+                .number(moveVersion)
                 .build());
         return moveResult;
     }
@@ -94,7 +97,7 @@ public class GameService {
         return nextSum == LAST_SUM;
     }
 
-    private String getNexTurn(Game game) {
+    private String getNextTurn(Game game) {
         return game.getNextTurn().equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1();
     }
 }
