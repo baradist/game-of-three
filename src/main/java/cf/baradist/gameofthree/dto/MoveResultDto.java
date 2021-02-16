@@ -1,4 +1,4 @@
-package cf.baradist.gameofthree.event;
+package cf.baradist.gameofthree.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoveResult extends ResultEvent {
+public class MoveResultDto extends ResultDto {
     private int nextSum;
     private String nextTurn;
     private int nextTurnNumber;

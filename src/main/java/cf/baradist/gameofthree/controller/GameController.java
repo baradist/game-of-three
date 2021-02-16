@@ -1,11 +1,11 @@
 package cf.baradist.gameofthree.controller;
 
-import cf.baradist.gameofthree.event.CreateGameEvent;
-import cf.baradist.gameofthree.event.CreatedGameEvent;
-import cf.baradist.gameofthree.event.JoinGameEvent;
-import cf.baradist.gameofthree.event.JoinedGameEvent;
-import cf.baradist.gameofthree.event.MoveEvent;
-import cf.baradist.gameofthree.event.MoveResult;
+import cf.baradist.gameofthree.dto.CreatGameResultDto;
+import cf.baradist.gameofthree.dto.CreateGameDto;
+import cf.baradist.gameofthree.dto.JoinGameDto;
+import cf.baradist.gameofthree.dto.JoinGameResultDto;
+import cf.baradist.gameofthree.dto.MoveDto;
+import cf.baradist.gameofthree.dto.MoveResultDto;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.model.Game;
 import cf.baradist.gameofthree.model.MoveAction;
@@ -44,28 +44,28 @@ public class GameController {
     }
 
     @PostMapping
-    public CreatedGameEvent startGame(@RequestBody CreateGameEvent event, Principal principal) {
+    public CreatGameResultDto startGame(@RequestBody CreateGameDto event, Principal principal) {
         String player = principal.getName();
         String gameId = service.startGame(player, event.getSum()).getId();
-        return CreatedGameEvent.builder()
+        return CreatGameResultDto.builder()
                 .gameId(gameId)
                 .build();
     }
 
     @PutMapping
-    public JoinedGameEvent joinGame(@RequestBody JoinGameEvent event, Principal principal) {
+    public JoinGameResultDto joinGame(@RequestBody JoinGameDto event, Principal principal) {
         String player = principal.getName();
         service.joinGame(event.getGameId(), player);
-        return JoinedGameEvent.builder()
+        return JoinGameResultDto.builder()
                 .gameId(event.getGameId())
                 .playerId(player)
                 .build();
     }
 
     @PostMapping("/{gameId}/move")
-    public MoveResult move(@PathVariable String gameId,
-                           @RequestBody MoveEvent event,
-                           Principal principal) {
+    public MoveResultDto move(@PathVariable String gameId,
+                              @RequestBody MoveDto event,
+                              Principal principal) {
         return service.move(gameId, event.getTurnNumber(), principal.getName(), MoveAction.ofValue(event.getAction()));
     }
 }

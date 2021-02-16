@@ -1,7 +1,7 @@
 package cf.baradist.gameofthree.service;
 
-import cf.baradist.gameofthree.event.GameDto;
-import cf.baradist.gameofthree.event.MoveResult;
+import cf.baradist.gameofthree.dto.GameDto;
+import cf.baradist.gameofthree.dto.MoveResultDto;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.GameStartedException;
 import cf.baradist.gameofthree.exception.IncorrectInitialSumException;
@@ -84,7 +84,7 @@ public class GameService {
                 .build();
     }
 
-    public MoveResult move(String gameId, int turnNumber, String player, MoveAction action) {
+    public MoveResultDto move(String gameId, int turnNumber, String player, MoveAction action) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
         if (!player.equals(game.getPlayer1()) && !player.equals(game.getPlayer2())) {
@@ -104,7 +104,7 @@ public class GameService {
         String nextTurnPlayer = getNextTurn(game, player);
         game.setNextTurn(nextTurnPlayer);
         int nextTurnNumber = turnNumber + 1;
-        MoveResult moveResult = MoveResult.builder()
+        MoveResultDto moveResult = MoveResultDto.builder()
                 .nextSum(nextSum)
                 .nextTurn(nextTurnPlayer)
                 .nextTurnNumber(nextTurnNumber)

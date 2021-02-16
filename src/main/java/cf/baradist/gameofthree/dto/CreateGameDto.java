@@ -1,4 +1,4 @@
-package cf.baradist.gameofthree.event;
+package cf.baradist.gameofthree.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateGameEvent {
+public class CreateGameDto {
     private int sum;
 }

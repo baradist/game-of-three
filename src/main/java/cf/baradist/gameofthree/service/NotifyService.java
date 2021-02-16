@@ -1,6 +1,6 @@
 package cf.baradist.gameofthree.service;
 
-import cf.baradist.gameofthree.event.ResultEvent;
+import cf.baradist.gameofthree.dto.ResultDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
@@ -13,11 +13,11 @@ public class NotifyService {
     private final SimpMessagingTemplate template;
     private final SimpUserRegistry userRegistry;
 
-    public void broadcast(ResultEvent event) {
+    public void broadcast(ResultDto event) {
         template.convertAndSend("/topic/games", event);
     }
 
-    public void sendTo(String player, ResultEvent event) {
+    public void sendTo(String player, ResultDto event) {
         template.convertAndSendToUser(player, "/queue/games", event);
     }
 }

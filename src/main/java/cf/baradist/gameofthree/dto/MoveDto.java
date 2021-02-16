@@ -1,9 +1,9 @@
-package cf.baradist.gameofthree.event;
+package cf.baradist.gameofthree.dto;
 
 import lombok.Data;
 
 @Data
-public class MoveEvent {
+public class MoveDto {
     private String gameId;
     private int turnNumber;
     private int action;
