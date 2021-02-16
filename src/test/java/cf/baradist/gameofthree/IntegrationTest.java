@@ -85,4 +85,32 @@ class IntegrationTest {
                 .andExpect(jsonPath("$.sum", is(1)))
                 .andExpect(jsonPath("$.winner", is(JOHN)));
     }
+
+    @Test
+    void testGetCurrentGameByPlayer() throws Exception {
+        String gameStartedContent = mockMvc.perform(post(GAME_API).with(user(JOHN))
+                .contentType(CONTENT_TYPE)
+                .content("{ \"sum\": 11 }"))
+                .andDo(print()).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        CreatedGameEvent joinedGameEvent = objectMapper.readValue(gameStartedContent, CreatedGameEvent.class);
+        String gameId = joinedGameEvent.getGameId();
+
+        mockMvc.perform(put(GAME_API).with(user(MARY))
+                .contentType(CONTENT_TYPE)
+                .content("{ \"gameId\": \"" + gameId + "\" }"))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.gameId", is(gameId)))
+                .andExpect(jsonPath("$.playerId", is(MARY)));
+
+        mockMvc.perform(get(GAME_API + "/current")
+                .with(user(JOHN)))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(gameId)));
+
+        mockMvc.perform(get(GAME_API + "/current")
+                .with(user(JOHN)))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(gameId)));
+    }
 }

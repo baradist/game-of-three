@@ -38,6 +38,11 @@ public class GameController {
         return service.getById(id).orElseThrow(GameNotFoundException::new);
     }
 
+    @GetMapping("/current")
+    public Game getCurrentByPlayer(Principal principal) {
+        return service.getCurrentGameByPlayer(principal.getName()).orElseThrow(GameNotFoundException::new);
+    }
+
     @PostMapping
     public CreatedGameEvent startGame(@RequestBody CreateGameEvent event, Principal principal) {
         String player = principal.getName();

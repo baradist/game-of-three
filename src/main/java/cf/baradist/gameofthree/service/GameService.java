@@ -39,6 +39,10 @@ public class GameService {
         return repository.findById(id);
     }
 
+    public Optional<Game> getCurrentGameByPlayer(String player) {
+        return repository.findByPlayer1OrPlayer2(player, player);
+    }
+
     public GameDto startGame(String initiatorPlayer, int sum) {
         if (sum < 1) {
             throw new IncorrectInitialSumException(sum);

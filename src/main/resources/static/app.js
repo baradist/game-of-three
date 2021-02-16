@@ -170,6 +170,19 @@ $(function () {
 });
 
 $(document).ready(function () {
+    connect()
+    $.ajax({
+        url: "/api/game/current",
+        context: document.body,
+        success: function (game) {
+            redrawCurrentGame(game)
+            if (game.nextTurn == currentUser) {
+                $("#status").text('It\'s your turn!');
+            } else {
+                $("#status").text('Waiting for the enemy...')
+            }
+        }
+    });
     $.ajax({
         url: "/api/game",
         context: document.body,
@@ -178,7 +191,6 @@ $(document).ready(function () {
             updateTable(games_table, games)
         }
     });
-    connect()
 });
 
 function updateTable(updatableTable, jsonData) {
