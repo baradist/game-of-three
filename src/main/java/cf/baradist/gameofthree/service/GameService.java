@@ -6,7 +6,7 @@ import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.GameStartedException;
 import cf.baradist.gameofthree.exception.IncorrectInitialSumException;
 import cf.baradist.gameofthree.exception.UserAlreadyParticipatedException;
-import cf.baradist.gameofthree.exception.WrongMoveException;
+import cf.baradist.gameofthree.exception.WrongSumException;
 import cf.baradist.gameofthree.exception.WrongTurnException;
 import cf.baradist.gameofthree.exception.WrongTurnNumberException;
 import cf.baradist.gameofthree.exception.WrongUserException;
@@ -72,18 +72,6 @@ public class GameService {
         return mapGameToDto(game);
     }
 
-    private GameDto mapGameToDto(Game game) {
-        return GameDto.builder()
-                .id(game.getId())
-                .player1(game.getPlayer1())
-                .player2(game.getPlayer2())
-                .nextTurn(game.getNextTurn())
-                .sum(game.getSum())
-                .winner(game.getWinner())
-                .turns(game.getTurns())
-                .build();
-    }
-
     public MoveResultDto move(String gameId, int turnNumber, String player, MoveAction action) {
         Game game = repository.findById(gameId)
                 .orElseThrow(GameNotFoundException::new);
@@ -98,7 +86,7 @@ public class GameService {
         }
         int sum = game.getSum() + action.getValue();
         if (isWrongSum(sum)) {
-            throw new WrongMoveException(game, player, sum);
+            throw new WrongSumException(game, player, sum);
         }
         int nextSum = sum / DELIMITER;
         String nextTurnPlayer = getNextTurn(game, player);
@@ -117,6 +105,18 @@ public class GameService {
         }
         repository.save(game);
         return moveResult;
+    }
+
+    private GameDto mapGameToDto(Game game) {
+        return GameDto.builder()
+                .id(game.getId())
+                .player1(game.getPlayer1())
+                .player2(game.getPlayer2())
+                .nextTurn(game.getNextTurn())
+                .sum(game.getSum())
+                .winner(game.getWinner())
+                .turns(game.getTurns())
+                .build();
     }
 
     private boolean isWrongSum(int sum) {
