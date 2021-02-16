@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatGameResultDto extends ResultDto {
+public class CreateGameResultDto extends ResultDto {
     private String gameId;
 }

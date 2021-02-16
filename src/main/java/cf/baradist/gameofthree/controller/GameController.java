@@ -1,7 +1,7 @@
 package cf.baradist.gameofthree.controller;
 
-import cf.baradist.gameofthree.dto.CreatGameResultDto;
 import cf.baradist.gameofthree.dto.CreateGameDto;
+import cf.baradist.gameofthree.dto.CreateGameResultDto;
 import cf.baradist.gameofthree.dto.JoinGameDto;
 import cf.baradist.gameofthree.dto.JoinGameResultDto;
 import cf.baradist.gameofthree.dto.MoveDto;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/game")
@@ -39,15 +40,15 @@ public class GameController {
     }
 
     @GetMapping("/current")
-    public Game getCurrentByPlayer(Principal principal) {
-        return service.getCurrentGameByPlayer(principal.getName()).orElseThrow(GameNotFoundException::new);
+    public Optional<Game> getCurrentByPlayer(Principal principal) {
+        return service.getCurrentGameByPlayer(principal.getName());
     }
 
     @PostMapping
-    public CreatGameResultDto startGame(@RequestBody CreateGameDto event, Principal principal) {
+    public CreateGameResultDto startGame(@RequestBody CreateGameDto event, Principal principal) {
         String player = principal.getName();
         String gameId = service.startGame(player, event.getSum()).getId();
-        return CreatGameResultDto.builder()
+        return CreateGameResultDto.builder()
                 .gameId(gameId)
                 .build();
     }

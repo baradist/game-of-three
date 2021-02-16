@@ -2,6 +2,7 @@ package cf.baradist.gameofthree.service;
 
 import cf.baradist.gameofthree.dto.GameDto;
 import cf.baradist.gameofthree.dto.MoveResultDto;
+import cf.baradist.gameofthree.event.AbstractResultEvent;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.GameStartedException;
 import cf.baradist.gameofthree.exception.IncorrectInitialSumException;
@@ -20,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
@@ -39,29 +41,38 @@ class GameServiceTest {
 
     @Mock
     private GameRepository repository;
+    @Mock
+    private ApplicationEventPublisher publisher;
     @Captor
     private ArgumentCaptor<Game> gameCaptor;
+    @Captor
+    private ArgumentCaptor<AbstractResultEvent> eventCaptor;
 
     private GameService service;
 
     @BeforeEach
     void setUp() {
-        service = new GameService(repository);
+        service = new GameService(repository, publisher);
     }
 
     @Test
     void startGameShouldStartGameAndReturnGameDto() {
-        assertThat(service.startGame(PLAYER, 42)).isNotNull()
+        GameDto gameDto = service.startGame(PLAYER, 42);
+        assertThat(gameDto).isNotNull()
                 .matches(g -> PLAYER.equals(g.getPlayer1()))
                 .matches(g -> g.getSum() == 42)
                 .matches(g -> g.getTurns() == 0);
         verify(repository).save(any(Game.class));
+        verify(publisher).publishEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getResultDto()).isEqualTo(gameDto);
     }
 
     @Test
     void startGameWhenSumIsLessThen1ShouldThrow() {
         assertThrows(IncorrectInitialSumException.class,
                 () -> service.startGame(PLAYER, 0));
+        verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -78,6 +89,9 @@ class GameServiceTest {
         assertThat(savedGame).isNotNull()
                 .matches(g -> g.getPlayer2().equals(PLAYER))
                 .matches(g -> g.getNextTurn().equals(PLAYER));
+
+        verify(publisher).publishEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getResultDto()).isEqualTo(gameDto);
     }
 
     @Test
@@ -85,6 +99,7 @@ class GameServiceTest {
         assertThrows(GameNotFoundException.class,
                 () -> service.joinGame(GAME_ID, PLAYER));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -94,6 +109,7 @@ class GameServiceTest {
         assertThrows(GameStartedException.class,
                 () -> service.joinGame(GAME_ID, PLAYER));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -103,6 +119,7 @@ class GameServiceTest {
         assertThrows(UserAlreadyParticipatedException.class,
                 () -> service.joinGame(GAME_ID, PLAYER));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -125,6 +142,9 @@ class GameServiceTest {
                 .matches(g -> g.getSum() == 14)
                 .matches(g -> g.getTurns() == 1)
                 .matches(g -> g.getWinner() == null);
+
+        verify(publisher).publishEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getResultDto()).isEqualTo(moveResult);
     }
 
     @Test
@@ -148,6 +168,9 @@ class GameServiceTest {
                 .matches(g -> g.getSum() == 1)
                 .matches(g -> g.getTurns() == 1)
                 .matches(g -> g.getWinner().equals(JOHN));
+
+        verify(publisher).publishEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getResultDto()).isEqualTo(moveResult);
     }
 
     @Test
@@ -155,6 +178,7 @@ class GameServiceTest {
         assertThrows(GameNotFoundException.class,
                 () -> service.move(GAME_ID, 0, JOHN, MoveAction.INCREMENT));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -165,6 +189,7 @@ class GameServiceTest {
         assertThrows(WrongUserException.class,
                 () -> service.move(GAME_ID, 0, "Mary", MoveAction.INCREMENT));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -175,6 +200,7 @@ class GameServiceTest {
         assertThrows(WrongTurnException.class,
                 () -> service.move(GAME_ID, 0, PLAYER, MoveAction.INCREMENT));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -185,6 +211,7 @@ class GameServiceTest {
         assertThrows(WrongTurnNumberException.class,
                 () -> service.move(GAME_ID, 42, JOHN, MoveAction.INCREMENT));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     @Test
@@ -195,6 +222,7 @@ class GameServiceTest {
         assertThrows(WrongSumException.class,
                 () -> service.move(GAME_ID, 0, JOHN, MoveAction.INCREMENT));
         verify(repository, never()).save(any(Game.class));
+        verify(publisher, never()).publishEvent(any());
     }
 
     private Game getGame() {

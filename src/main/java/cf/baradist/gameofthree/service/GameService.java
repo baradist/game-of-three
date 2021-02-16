@@ -2,6 +2,9 @@ package cf.baradist.gameofthree.service;
 
 import cf.baradist.gameofthree.dto.GameDto;
 import cf.baradist.gameofthree.dto.MoveResultDto;
+import cf.baradist.gameofthree.event.GameJoinedEvent;
+import cf.baradist.gameofthree.event.GameStartedEvent;
+import cf.baradist.gameofthree.event.MoveResultEvent;
 import cf.baradist.gameofthree.exception.GameNotFoundException;
 import cf.baradist.gameofthree.exception.GameStartedException;
 import cf.baradist.gameofthree.exception.IncorrectInitialSumException;
@@ -14,6 +17,7 @@ import cf.baradist.gameofthree.model.Game;
 import cf.baradist.gameofthree.model.MoveAction;
 import cf.baradist.gameofthree.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +34,7 @@ public class GameService {
     public static final int LAST_SUM = 1;
 
     private final GameRepository repository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<Game> getAvailableGameSessions() {
         return repository.findAll(); // TODO: temporary show all games
@@ -54,7 +59,9 @@ public class GameService {
                 .turns(0)
                 .build();
         repository.save(game);
-        return mapGameToDto(game);
+        GameDto gameDto = mapGameToDto(game);
+        eventPublisher.publishEvent(new GameStartedEvent(this, gameDto));
+        return gameDto;
     }
 
     public GameDto joinGame(String gameId, String player) {
@@ -69,7 +76,9 @@ public class GameService {
         game.setPlayer2(player);
         game.setNextTurn(player);
         repository.save(game);
-        return mapGameToDto(game);
+        GameDto gameDto = mapGameToDto(game);
+        eventPublisher.publishEvent(new GameJoinedEvent(this, gameDto));
+        return gameDto;
     }
 
     public MoveResultDto move(String gameId, int turnNumber, String player, MoveAction action) {
@@ -104,6 +113,8 @@ public class GameService {
             moveResult.setWinner(player);
         }
         repository.save(game);
+        eventPublisher.publishEvent(
+                new MoveResultEvent(this, moveResult, List.of(game.getPlayer1(), game.getPlayer2())));
         return moveResult;
     }
 
