@@ -1,1 +1,10 @@
-Simple turn-based multiuser game.
+# Simple turn-based multiuser game.
+
+## TO DO:
+
+- Simplify a model. Keep everything in one table
+- Add an endpoint getCurrentGame(String player), use it after page loads
+- Add unit-tests
+- Cover WS-components by integration-tests
+- Wrap everything into a docker image for the sake of platform independence
+- Write readme

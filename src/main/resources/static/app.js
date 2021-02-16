@@ -3,6 +3,7 @@ var stompClient = null;
 var currentUser = null
 var currentGame = null
 var gameList = null
+var nextMoveVersion = 0 // TODO
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -96,7 +97,7 @@ function redrawCurrentGame(game) {
     currentGame = game
     updateTable(current_game, [currentGame]);
     $("#game_id").val(currentGame.id)
-    $("#move_version").val(0)
+    $("#move_version").val(0) // TODO: ?????
 }
 
 function addGame(game) {
