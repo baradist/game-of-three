@@ -1,6 +1,7 @@
 package cf.baradist.gameofthree.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @Entity
 @Table
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Game implements Serializable {
@@ -21,6 +23,6 @@ public class Game implements Serializable {
     private String player2;
     private String nextTurn;
     private int sum;
-    private boolean finished;
     private String winner;
+    private int turns;
 }

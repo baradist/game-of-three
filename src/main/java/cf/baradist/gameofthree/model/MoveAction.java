@@ -5,7 +5,6 @@ public enum MoveAction {
     DONT_CHANGE(0),
     INCREMENT(1);
 
-
     private final int value;
 
     MoveAction(int value) {

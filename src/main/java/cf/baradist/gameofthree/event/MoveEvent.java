@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class MoveEvent {
     private String gameId;
-    private int moveVersion;
+    private int turnNumber;
     private int action;
 }

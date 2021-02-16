@@ -52,7 +52,6 @@ class IntegrationTest {
                 .andExpect(jsonPath("[0].player2", nullValue()))
                 .andExpect(jsonPath("[0].nextTurn", nullValue()))
                 .andExpect(jsonPath("[0].sum", is(11)))
-                .andExpect(jsonPath("[0].finished", is(false)))
                 .andExpect(jsonPath("[0].winner", nullValue()));
 
         mockMvc.perform(put(GAME_API).with(user(MARY))
@@ -71,22 +70,19 @@ class IntegrationTest {
         String moveUrl = GAME_API + "/" + gameId + "/move";
         mockMvc.perform(post(moveUrl).with(user(MARY))
                 .contentType(CONTENT_TYPE)
-                .content("{\"gameId\": \"" + gameId + "\", \"number\": 0, \"action\": 1}"))
+                .content("{\"gameId\": \"" + gameId + "\", \"turnNumber\": 0, \"action\": 1}"))
                 .andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$.sum", is(4)))
-                .andExpect(jsonPath("$.finished", is(false)));
+                .andExpect(jsonPath("$.nextSum", is(4)));
 
         mockMvc.perform(post(moveUrl).with(user(JOHN))
                 .contentType(CONTENT_TYPE)
-                .content("{\"gameId\": \"" + gameId + "\", \"number\": 0, \"action\": -1}"))
+                .content("{\"gameId\": \"" + gameId + "\", \"turnNumber\": 1, \"action\": -1}"))
                 .andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$.sum", is(1)))
-                .andExpect(jsonPath("$.finished", is(true)));
+                .andExpect(jsonPath("$.nextSum", is(1)));
 
         mockMvc.perform(get(GAME_API + "/" + gameId).with(user(JOHN)))
                 .andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.sum", is(1)))
-                .andExpect(jsonPath("$.finished", is(true)))
                 .andExpect(jsonPath("$.winner", is(JOHN)));
     }
 }

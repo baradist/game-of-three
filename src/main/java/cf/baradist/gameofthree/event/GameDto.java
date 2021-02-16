@@ -15,6 +15,6 @@ public class GameDto extends ResultEvent {
     private String player2;
     private String nextTurn;
     private int sum;
-    private boolean finished;
     private String winner;
+    private int turns;
 }

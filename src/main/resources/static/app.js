@@ -54,7 +54,7 @@ function processGameMessage(game) {
     if (game.player1 == currentUser || game.player2 == currentUser) {
         redrawCurrentGame(game);
         if (game.nextTurn == currentUser) {
-            $("#status").text('It\'s our turn!');
+            $("#status").text('It\'s your turn!');
             doMoveIfAuto(game.sum)
         } else {
             $("#status").text('Waiting for the enemy...')
@@ -78,7 +78,7 @@ function processGameMessage(game) {
 }
 
 function switchStatus(moveResult) {
-    if (moveResult.finished) {
+    if (moveResult.winner != null) {
         if (currentUser == moveResult.winner) {
             $("#status").text('YOU WIN!');
         } else {
@@ -86,7 +86,7 @@ function switchStatus(moveResult) {
         }
     } else {
         if (currentUser == moveResult.nextTurn) {
-            $("#status").text('It\'s our turn!');
+            $("#status").text('It\'s your turn!');
         } else {
             $("#status").text('Waiting for the enemy...');
         }
@@ -97,7 +97,7 @@ function redrawCurrentGame(game) {
     currentGame = game
     updateTable(current_game, [currentGame]);
     $("#game_id").val(currentGame.id)
-    $("#move_version").val(0) // TODO: ?????
+    $("#move_version").val(currentGame.turns)
 }
 
 function addGame(game) {
@@ -106,16 +106,17 @@ function addGame(game) {
 }
 
 function processMove(moveResult) {
-    $("#move_version").val(moveResult.nextMoveVersion)
+    $("#move_version").val(moveResult.nextTurnNumber)
     currentGame.sum = moveResult.nextSum
-    currentGame.finished = moveResult.finished
-    if (moveResult.finished) {
-        currentGame.winner = currentGame.nextTurn;
+    // currentGame.finished = moveResult.finished
+    if (moveResult.winner != null) {
+        currentGame.winner = moveResult.winner;
     }
     currentGame.nextTurn = moveResult.nextTurn
+    currentGame.turns = moveResult.nextTurnNumber
     redrawCurrentGame(currentGame)
     switchStatus(moveResult)
-    if (!moveResult.finished && currentUser == moveResult.nextTurn) {
+    if (moveResult.winner == null && currentUser == moveResult.nextTurn) {
         doMoveIfAuto(moveResult.nextSum)
     }
 }
@@ -123,7 +124,7 @@ function processMove(moveResult) {
 function sendAction(action) {
     stompClient.send("/app/move", {}, JSON.stringify({
         'gameId': $("#game_id").val(),
-        'moveVersion': $("#move_version").val(),
+        'turnNumber': $("#move_version").val(),
         'action': action
     }));
 }
