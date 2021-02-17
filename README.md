@@ -47,12 +47,16 @@ Currently there are only two users in the system: admin and user (both have a pa
 - enter user 'user' and password '1'
 - enter initial sum into "Sum of a new game", press "Create New Game"-button in any session
 - press "Join Existing Game" in another session
-- switch between sessions and use buttons "-1", "0", "1" to do moves. Alternatively, check "Auto mode" and enjoy
+- switch between sessions and use buttons "-1", "0", "1" to do moves. Alternatively, check "Auto mode" and enjoy 
+    
+  - when it checked and a the frontend receives a signal, that the opponent moved, the frontend "thinks" 2 seconds and does a move automatically
 
 
 ## TO DO:
 
+- Deny participating in more than 1 active games.
+- Implement possibility to leave a game.
 - Cover WS-components by integration-tests.
 - Connect Postgres instead of H2.
 - Configure UserDetailsService that stores users.
-- Use some message broker  instead of local spring-events in order to make the App scalable.
+- Use some message-broker instead of local spring-events in order to make the App scalable.
