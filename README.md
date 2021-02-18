@@ -54,6 +54,8 @@ Currently there are only two users in the system: admin and user (both have a pa
 
 ## TO DO:
 
+- Add logs
+- Handle exceptions, send error messages
 - Deny participating in more than 1 active games.
 - Implement possibility to leave a game.
 - Cover WS-components by integration-tests.
